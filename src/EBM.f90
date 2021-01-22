@@ -95,7 +95,8 @@ PROGRAM EBM
 !  tau_mixed_layer:   relaxation time for mixed layer
 !  A:   OLR coefficient, A+BT
 !  spinup:  model spin-up time
-!  geography(NX6,NY6):  masks for the whole globe      
+!  geography(NX6,NY6):  masks for the whole globe 
+!  orography(NX6,NY6):  field with heights      
 !  RelErr = 2.0e-5:  relative error between years
 !  nx(NG), ny(NG):  grid points on each level
 !  h(NG):  dx,dy on each grid level
@@ -117,6 +118,7 @@ PROGRAM EBM
 !--------------------- general EBM variables -----------------------------
     real :: rhs(NX6,NY6)
     real :: Temp(NX6,NY6)
+    real :: Tsurf(NX6,NY6)
     real :: Lastrhs(NX6,NY6)
     real :: SF(NX6,NY6), last_SF(NX6,NY6)
     real :: solar(NY6,NT)
@@ -176,6 +178,7 @@ PROGRAM EBM
 
     real:: SECNDS, secs, elapsed_time           
     integer:: geography(NX6,NY6), geography_init(NX6,NY6), geo_update(NX6,NY6,12), ice_cnt(NX6,NY6), ice_mask(NX6,NY6)
+    real:: orography(NX6,NY6)
     integer:: i, j, yr, tstep, year, ts
     integer::  mcount
     real:: tstep2months, tstepsPerMonth, tscount!, monthly_map
@@ -185,7 +188,7 @@ PROGRAM EBM
 
     character(len=:), allocatable :: datafile, datafile_sf, datafile_heatCap, datafile_lastRhs, datafile_lastSF, &
                                     datafile_map, datafile_coalbedo, datafile_ice, filename_albedo, &
-                                    filename_geo
+                                    filename_geo, filename_oro, datafile_Tsurf
     character(len=:), allocatable :: startMessage
 
     character(len=3):: months(12) = (/'jan','feb','mar','apr','may','jun',  &
@@ -232,7 +235,7 @@ PROGRAM EBM
 
     ! parse configuration file
     ! CHEETAH: SETTING OF CONFIG FILE
-    call conf%parse_config('../config/default_config.conf')
+    call conf%parse_config('../')
     restart_conf = conf
     restart_conf%restart = .true.
 
@@ -368,10 +371,15 @@ PROGRAM EBM
     tmp = '../input/albedo_'//run_id//'.nc'
     filename_albedo = trim(adjustl(tmp))
 
+    tmp = '../input/orography_'//run_id//'.nc'
+    filename_oro = trim(adjustl(tmp))
+
     !------------------ Read geography and coalbedos from input --------------
     CALL geography_input(geography, filename_geo)
+    CALL orography_input(orography, filename_geo)
     CALL albedo_input(Pcoalbedo, filename_albedo)
     geography_init = geography
+    
     Pcoalbedo_init = Pcoalbedo
 
     !-------------------  Calculate the heat capacities  --------------------- 
@@ -428,6 +436,7 @@ PROGRAM EBM
     call mkdir(wrk_dir//filename_base, .true.)
     call mkdir(wrk_dir//filename_base//'/bin', .false.)
     call mkdir(wrk_dir//filename_base//'/bin/T', .false.)
+    call mkdir(wrk_dir//filename_base//'/bin/Tsurf', .false.)
     call mkdir(wrk_dir//filename_base//'/bin/LastRhs', .false.)
     call mkdir(wrk_dir//filename_base//'/bin/LastSF', .false.)
     if (write_S .eqv. .true.) call mkdir(wrk_dir//filename_base//'/bin/S', .false.)
@@ -440,6 +449,8 @@ PROGRAM EBM
 
     tmp = wrk_dir//filename_base//'/bin/T/T_yr-'
     datafile = trim(adjustl(tmp))
+    tmp = wrk_dir//filename_base//'/bin/Tsurf/Tsurf_yr-'
+    datafile_Tsurf = trim(adjustl(tmp))
     tmp = wrk_dir//filename_base//'/bin/LastRhs/LastRhs_yr-'
     datafile_lastRhs = trim(adjustl(tmp))
     tmp = wrk_dir//filename_base//'/bin/LastSF/LastSF_yr-'
@@ -478,7 +489,7 @@ PROGRAM EBM
     tmp = 'mv '//trim(adjustl(filename_albedo))//' '//wrk_dir//filename_base
     call system(tmp)
     ! CHEETAH: COPYING OF CONFIG FILE
-    tmp = 'cp ../config/default_config.conf '//wrk_dir//filename_base
+    tmp = 'cp ../ '//wrk_dir//filename_base
     call system(tmp)
 
     !-------------------------- Write input parameters  ----------------------  
@@ -643,11 +654,15 @@ PROGRAM EBM
     61    format ('NO Convergence within max number of V cycles')
           STOP
         end if
+
+        Call Lapsrate_diffusion (nx, ny, orography, Temp, Tsurf)
+
     !---------------------    run time step data  ----------------------------
         if (period_cnt == period) then !if(run_years.or.Equilibrium) then     
           write (step, '(i2)') tstep 
           if (tstep < 10) step(1:1) = '0'!put 0 in front of steps y 10 => 1 becomes 01,...
           call write2Dfile(datafile//yr2str(yr)//'_t'//step//'.bin', Temp)
+          call write2Dfile(datafile_Tsurf//yr2str(yr)//'_t'//step//'.bin', Tsurf)
           if (write_map) call write2Dfile(datafile_map//yr2str(yr)//'_t'//step//'.bin', geography)
           if (write_a) call write2Dfile(datafile_coalbedo//yr2str(yr)//'_t'//step//'.bin', Pcoalbedo(:,:,tstep))
           if (write_S) call write2Dfile(datafile_sf//yr2str(yr)//'_t'//step//'.bin', SF)

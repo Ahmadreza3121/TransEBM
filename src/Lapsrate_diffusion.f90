@@ -14,6 +14,7 @@ real,intent(in):: orography(nx,ny)
 
 real, intent(inout):: Temp(nx,ny)
 real, intent(out):: Tsurf(nx,ny)
+integer :: i,j
 
 
 ! Lapsrate 
@@ -28,12 +29,13 @@ real,parameter:: Laps_rate = 0.007               ! K/m
    
            
 ! Assign the correct value of the heat capacity of the columns
- do j = 1, ny
-   do i = 1, nx
-    
-                               
-   end do
- end do  
+ 
+do i = 1, nx
+  do j = 1, ny
+    !Temp(i,j) = 10.
+    Tsurf(i,j) = Temp(i,j) - orography(i,j) * Laps_rate                         
+  end do
+end do  
 
 
 
