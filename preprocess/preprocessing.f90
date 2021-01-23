@@ -59,7 +59,6 @@ program preprocessing
 ! both prepare_albedo and geography calculate lon/lat stuff 
     call prepare_albedo(name_albedoDat, name_albedoNc)
     call geography(geo, name_geo)
-    !call orography(oro, name_oro)
 
     print *,'Preprocess DONE! '
     print *, '-------------------------------------------'

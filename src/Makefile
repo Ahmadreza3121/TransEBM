@@ -4,7 +4,7 @@
 # 3) if lnetcdff doesn't exist as a flag for the netcdf for Fortran library in your system, remove it and use: -L${NA} instead and provide the path as NA=...
 # 4) change FC to your Fortran compiler of choice
 
-FC=gfortran-7
+FC=gfortran
 NAME=EBM
 #NA=/home/username/netcdf/lib
 NI=/usr/include 

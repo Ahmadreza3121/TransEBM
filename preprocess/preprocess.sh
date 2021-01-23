@@ -5,7 +5,7 @@
 # 2) if lnetcdff doesn't exist as a flag for the netcdf for Fortran library in your system, remove it and use: -L/home/username/netcdf/lib and the commented line instead to provide the path to the netcdf library
 # 3) change gfortran-7 to Fortran compiler of choice
 
-gfortran-7 -c ../config/parse_config.f90 -o ../config/parse_config.o
+gfortran -c ../config/parse_config.f90 -o ../config/parse_config.o
 cp ../config/parse_config.o ../src/
 cp ../config/parse_config.o ../preprocess/
 cp ../config/configuration_parser.mod ../src/
