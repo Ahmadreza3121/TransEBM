@@ -4,3 +4,5 @@ EBM
 .nfs*
 input
 preprocess/preprocessing
+work
+output
