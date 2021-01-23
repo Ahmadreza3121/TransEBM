@@ -42,7 +42,7 @@ subroutine read_data(filename, data, len)
 end subroutine read_data
 
 !program try_it 
-    ! run with: gfortran-7 read_data.f90 -i read_data.o ../config/parse_config-o -I/home/albus/Documents/Models/EBM/Model/config
+    ! run with: gfortran read_data.f90 -i read_data.o ../config/parse_config-o -I/home/albus/Documents/Models/EBM/Model/config
     ! then: ./read_data.o
 !    use configuration_parser
 
