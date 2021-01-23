@@ -6,7 +6,7 @@
 
 !     This is the name of the data file we will create.
       character*(*) filename
-!      parameter (filename = '../input/orography.nc')
+      parameter (filename = '/home/csys/amasoum/Desktop/I7G_NA.VM7_1deg.21_remap.nc')
       integer ncid
       real error 
       parameter(error = 1.0e-10)

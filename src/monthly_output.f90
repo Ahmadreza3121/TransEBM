@@ -49,6 +49,12 @@
       integer temp_varid
       integer dimids(NDIMS), c_dimids(c_ndims)
 
+!     We will create the Tsurf field.
+      character*(*) Tsurf_NAME
+      parameter (Tsurf_NAME='Tsurf')
+      integer Tsurf_varid
+      
+
 !     Heat capacities field.
       character*(*) c_name
       parameter (c_name='heat_capacity')
@@ -72,8 +78,9 @@
 !     We recommend that each variable carry a "units" attribute.
       character*(*) UNITS
       parameter (UNITS = 'units')
-      character*(*) TEMP_UNITS, LAT_UNITS, LON_UNITS, lvl_units, S_units, c_units, a_units, m_units!, rec_units
+      character*(*) TEMP_UNITS, Tsurf_UNITS, LAT_UNITS, LON_UNITS, lvl_units, S_units, c_units, a_units, m_units!, rec_units
       parameter (TEMP_UNITS = 'celsius')
+      parameter (Tsurf_UNITS = 'celsius')
       parameter (LAT_UNITS = 'degrees_north')
       parameter (LON_UNITS = 'degrees_east')
       parameter (lvl_units = '1')
@@ -84,6 +91,7 @@
       parameter (m_units = '1')
 
       real temp_out(NLONS,NLATS,NLVS,NRECS),temp(NLONS,NLATS)
+      real Tsurf_out(NLONS,NLATS,NLVS,NRECS),Tsurf(NLONS,NLATS)
       real S_out(NLONS,NLATS,NLVS,NRECS),S(NLONS,NLATS)
       real c_out(NLONS,NLATS,NLVS),c(NLONS,NLATS)
       real a_out(NLONS,NLATS,NLVS,NRECS),a(NLONS,NLATS)
@@ -159,11 +167,13 @@
  
 !     Define the netCDF variables for the temperature & heat capacity & solar insolation data.
       retval = nf_def_var(ncid, TEMP_NAME, NF_REAL, NDIMS, dimids, temp_varid)
+      retval = nf_def_var(ncid, Tsurf_NAME, NF_REAL, NDIMS, dimids, Tsurf_varid)
       if (write_c .eqv. .true.) retval = nf_def_var(ncid, c_name, NF_REAL, c_ndims, c_dimids, c_varid)
       if (write_S .eqv. .true.) retval = nf_def_var(ncid, S_name, NF_REAL, NDIMS, dimids, S_varid)
       
 !     Assign units attributes to the netCDF variables.
       retval = nf_put_att_text(ncid, temp_varid, UNITS, len(TEMP_UNITS), TEMP_UNITS)
+      retval = nf_put_att_text(ncid, Tsurf_varid, UNITS, len(Tsurf_UNITS), Tsurf_UNITS)
       if (write_c .eqv. .true.) retval = nf_put_att_text(ncid, c_varid, UNITS, len(c_units), c_units)
       if (write_S .eqv. .true.) retval = nf_put_att_text(ncid, S_varid, UNITS, len(S_units), S_units)
  
@@ -219,6 +229,15 @@
                         close(1)
             !            close (1,status='delete')
                         temp_out(:,:,NLVS,ts) = temp(:,:)
+                        
+                        BINfile = wrk_dir//filename_base//'/bin/Tsurf/Tsurf_yr-'// &
+                              yr2str(yr)// '_' // months(ts)//'.bin'
+
+                        open (unit=1, file=BINfile, status='old')
+                        read (1,*) Tsurf
+                        close(1)
+            !            close (1,status='delete')
+                        Tsurf_out(:,:,NLVS,ts) = Tsurf(:,:)
 
                         if (write_S .eqv. .true.) then
                               BINfile = wrk_dir//filename_base//'/bin/S/S_yr-'// &
@@ -234,7 +253,7 @@
       
             !     write temperature output to netcdf file 
                   retval = nf_put_vara_real(ncid, temp_varid, start, count, temp_out)
-
+                  retval = nf_put_vara_real(ncid, Tsurf_varid, start, count, Tsurf_out)
             !     write solar insolation output to netcdf file 
                   if (write_S .eqv. .true.) retval = nf_put_vara_real(ncid, S_varid, start, count, S_out)
 

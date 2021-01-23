@@ -56,8 +56,8 @@ echo EBM_out_dir=$EBM_out_dir
 echo EBM_runid=$EBM_runid
 echo EBM_wrk_dir=$EBM_wrk_dir
 
-#cd ../postprocess
-#bash postprocess_cdo.sh $EBM_wrk_dir
+cd ../postprocess
+bash postprocess_cdo.sh $EBM_wrk_dir
 mkdir -p $EBM_out_dir/$EBM_runid/
 mv $EBM_wrk_dir/* $EBM_out_dir/$EBM_runid/
 rmdir $EBM_wrk_dir

@@ -7,8 +7,8 @@ program preprocessing
 
     integer,parameter             :: nx=128, ny=65
     integer                       :: lon, lat
-    integer                       :: geo(nx,ny), ice(nx,ny)
-    character(len=:), allocatable :: name_albedoDat, name_albedoNc, name_geo, id
+    integer                       :: geo(nx,ny), ice(nx,ny), oro(nx,ny)
+    character(len=:), allocatable :: name_albedoDat, name_albedoNc, name_geo, name_oro, id
     character(len=200)            :: tmp
 
     !     Configuration file parsing
@@ -19,7 +19,7 @@ program preprocessing
     print *, 'Preprocess begins:           '
 
 !   CHEETAH: LOADING OF CONFIG FILE
-    call conf%parse_config('../config/default_config.conf')
+    call conf%parse_config('../')
 
     open(20, file = conf%world, status = 'old') 
 
@@ -50,12 +50,16 @@ program preprocessing
     name_albedoNc = trim(adjustl(tmp))
     tmp = 'geography_'//id//'.nc'
     name_geo = trim(adjustl(tmp))
+    tmp = 'orography_'//id//'.nc'
+    name_oro = trim(adjustl(tmp))
+
 
     call extract(geo, name_albedoDat, conf%orig, conf%a_land, conf%a_land_lat, conf%a_seaice, &
         conf%a_landice, conf%a_ocean, conf%a_ocean_lat)
 ! both prepare_albedo and geography calculate lon/lat stuff 
     call prepare_albedo(name_albedoDat, name_albedoNc)
     call geography(geo, name_geo)
+    !call orography(oro, name_oro)
 
     print *,'Preprocess DONE! '
     print *, '-------------------------------------------'

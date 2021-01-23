@@ -124,7 +124,7 @@ PROGRAM EBM
     real :: solar(NY6,NT)
     real :: Pcoalbedo(NX6,NY6,NT), Pcoalbedo_init(NX6,NY6,NT), legendre(NY6)
     real :: HeatCap(NX6,NY6), HeatCap_init(NX6,NY6)
-    real :: sum(NX6,NY6)
+    real :: sum(NX6,NY6), sum_Tsurf(NX6,NY6)
     real :: sum_sf(NX6,NY6), sum_coalbedo(NX6,NY6), sum_c(NX6,NY6)!, sum_map(NX6,NY6)
     real :: latd(NY6)
     real :: lond(NX6+1)
@@ -376,7 +376,7 @@ PROGRAM EBM
 
     !------------------ Read geography and coalbedos from input --------------
     CALL geography_input(geography, filename_geo)
-    CALL orography_input(orography, filename_geo)
+    CALL orography_input(orography, filename_oro)
     CALL albedo_input(Pcoalbedo, filename_albedo)
     geography_init = geography
     
@@ -534,6 +534,7 @@ PROGRAM EBM
     period_cnt = 1 !previously period_cnt = period (has to be changed in monthly-output & timesteps-output as well)
 
     sum = 0.0
+    sum_Tsurf = 0.0
     sum_sf = 0.0
     sum_coalbedo = 0.0
     sum_c = 0.0
@@ -655,7 +656,7 @@ PROGRAM EBM
           STOP
         end if
 
-        Call Lapsrate_diffusion (nx, ny, orography, Temp, Tsurf)
+        Call Lapsrate_diffusion (NX6, NY6, orography, Temp, Tsurf)
 
     !---------------------    run time step data  ----------------------------
         if (period_cnt == period) then !if(run_years.or.Equilibrium) then     
@@ -670,6 +671,7 @@ PROGRAM EBM
 
     !      sum = sum + 0.25*Temp !b/c 4 values are averaged for monthly temps! so for a different NT this has to change
           sum = sum + tstep2months * Temp
+          sum_Tsurf = sum_Tsurf + tstep2months * Tsurf
           if (write_S) sum_sf = sum_sf + tstep2months * SF(:,:)
           if (write_a) sum_coalbedo = sum_coalbedo + tstep2months * Pcoalbedo(:,:,tstep)
           if (write_c .and. ice_ebm) sum_c = sum_c + tstep2months * HeatCap(:,:)
@@ -678,6 +680,7 @@ PROGRAM EBM
     !      if (mod(tscount,4.0) == 0.0) then ! modulus 4 because that corresponds to one month having past (since NT=48)
           if (mod(tscount,tstepsPerMonth) == 0.0) then ! modulus 4 because that corresponds to one month having past (since NT=48)
             call write2Dfile(datafile//yr2str(yr)//'_'//months(mcount)//'.bin', sum)
+            call write2Dfile(datafile_Tsurf//yr2str(yr)//'_'//months(mcount)//'.bin', sum_Tsurf)
             if (write_S) call write2Dfile(datafile_sf//yr2str(yr)//'_'//months(mcount)//'.bin', sum_sf)
             if (write_a) call write2Dfile(datafile_coalbedo//yr2str(yr)//'_'//months(mcount)//'.bin', sum_coalbedo)
             if (write_c .and. ice_ebm) call write2Dfile(datafile_heatCap//yr2str(yr)//'_'//months(mcount)//'.bin', sum_c)
@@ -686,6 +689,7 @@ PROGRAM EBM
             ryear = real(year) + 0.041667 + 0.083333*real(mcount-1)
             mcount = mcount + 1
             sum = 0.0
+            sum_Tsurf = 0.0
             sum_sf = 0.0
             sum_coalbedo = 0.0
             sum_c = 0.0

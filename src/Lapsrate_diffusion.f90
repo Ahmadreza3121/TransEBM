@@ -33,7 +33,8 @@ real,parameter:: Laps_rate = 0.007               ! K/m
 do i = 1, nx
   do j = 1, ny
     !Temp(i,j) = 10.
-    Tsurf(i,j) = Temp(i,j) - orography(i,j) * Laps_rate                         
+    Tsurf(i,j) = Temp(i,j) - orography(i,j) * Laps_rate
+    write(*,*) i,j,Tsurf(i,j),Temp(i,j),orography(i,j)                         
   end do
 end do  
 

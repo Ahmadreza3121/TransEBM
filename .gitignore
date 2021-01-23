@@ -2,3 +2,5 @@
 *.mod
 EBM
 .nfs*
+input
+preprocess/preprocessing
