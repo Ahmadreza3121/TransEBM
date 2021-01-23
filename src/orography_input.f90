@@ -6,7 +6,6 @@
 
 !     This is the name of the data file we will create.
       character*(*) filename
-!      parameter (filename = "/home/csys/amasoum/Desktop/I7G_NA.VM7_1deg.21_remap.nc")
       integer ncid
       real error 
       parameter(error = 1.0e-10)
@@ -29,7 +28,7 @@
       integer lon_varid, lat_varid
 
       character*(*) ORO_NAME
-      parameter (oro_NAME='Topo')
+      parameter (ORO_NAME='Topo')
       integer ORO_varid
       integer dimids(NDIMS)
 
@@ -89,8 +88,8 @@
 !     Get the varids of the orography netCDF variables.
       retval = nf_inq_varid(ncid, ORO_NAME, ORO_varid)
       
-!     Read the surface ALBEDO data from the file
-      retval = nf_get_vara_int(ncid, ORO_varid, start, count, orography)
+!     Read the surface orography data from the file
+      retval = nf_get_vara_real(ncid, ORO_varid, start, count, orography)
  
 !     Close the dat file and make sure your data are really written to disk.
       retval = nf_close(ncid)

@@ -4,5 +4,5 @@ ifort preprocessing.f90 extract.f90 prepare_albedo.f90 prepare_geography.f90 -o 
 
 ./preprocessing
 mv -f *.nc ../input
-cp /home/jan/Desktop/I7G_NA.VM7_1deg.21.nc ../input/orography_run.nc
+cp orography_run.nc ../input/orography_run.nc
 rm -rf *~

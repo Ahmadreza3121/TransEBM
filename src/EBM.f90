@@ -484,6 +484,7 @@ PROGRAM EBM
     ! as well as copying the configuration to it
     call mkdir(wrk_dir, .false.)
     tmp = 'mv '//trim(adjustl(filename_geo))//' '//wrk_dir//filename_base
+    tmp = 'cp '//trim(adjustl(filename_oro))//' '//wrk_dir//filename_base
 !    write(*,*) 'run command: ', trim(adjustl(tmp))
     call system(tmp)
     tmp = 'mv '//trim(adjustl(filename_albedo))//' '//wrk_dir//filename_base
